@@ -28,5 +28,10 @@ namespace ExcelTestTask.Infrastructure
                     return false;
             }
         }
+
+        public static Type[] GetAllSubTypes(Type type)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

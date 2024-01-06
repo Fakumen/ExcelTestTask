@@ -1,7 +1,9 @@
 ﻿using ClosedXML.Excel;
+using DocumentFormat.OpenXml.Office2010.Excel;
+using DocumentFormat.OpenXml.Spreadsheet;
 using ExcelTestTask.Application;
-using ExcelTestTask.Data;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -12,42 +14,60 @@ namespace ExcelTestTask
         private static void Main(string[] args)
         {
             var context = new ApplicationContext();
+            var argumentsParser = new ArgumentParser();
+            //GetAllSubTypes<ICommand>()
+            var commands = new List<ICommand>()
+            {
+                new ChooseFileCommand()
+            };
 
             while (true)
             {
-                //List of available commands
-                Console.WriteLine("0. Choose file path (path)");
-                Console.WriteLine("1. Get product details (product name)");
-                Console.WriteLine("2. Change contact info (organization, contact info)");
-                Console.WriteLine("3. Get golden client (year, month)");
+                //Console.WriteLine("0. Choose file path (path)");
+                //Console.WriteLine("1. Get product details (product name)");
+                //Console.WriteLine("2. Change contact info (organization, contact info)");
+                //Console.WriteLine("3. Get golden client (year, month)");
+                var availableCommands = commands.Where(c => c.IsAvailable(context)).ToArray();
+                for (var i = 0; i < availableCommands.Length; i++ )
+                {
+                    var command = availableCommands[i];
+                    Console.WriteLine($"{i}. {command.Name}");
+                }
 
                 var key = Console.ReadKey(true);
                 var commandId = key.Key - ConsoleKey.D0;
 
+                if (commandId >= 0 && commandId < availableCommands.Length)
+                {
+                    var command = availableCommands[commandId];
+                    var arguments = new List<ICommandArgument>();
+                    foreach (var argDesc in command.ArgumentDescriptions)
+                    {
+                        Console.WriteLine($"Введите \"{argDesc.Description}\":");
+                        var input = Console.ReadLine();
+                        //try catch
+                        var arg = argumentsParser.ParseArgument(argDesc, input);
+                        arguments.Add(arg);
+                        Console.WriteLine();
+                    };
+                    //try catch
+                    var result = command.Execute(context, arguments.ToArray());
+                    if (result.IsSuccessful)
+                        Console.WriteLine($"Успешно: {result.Description}");
+                    else
+                        Console.WriteLine($"Не выполнено: {result.Description}");
+                }
+                else
+                    Console.WriteLine("\nWrong command\n");
+
                 if (commandId == 0)
                 {
-                    Console.WriteLine("Enter file path:");
-                    var path = Console.ReadLine();
-
-                    if (File.Exists(path))//&& CanOpen)
-                    {
-                        var workbook = new XLWorkbook(path);
-                        var sheets = workbook.Worksheets;
-                        var model = CreateModel(sheets);
-
-                        context.Workbook?.Dispose();
-                        context.Workbook = workbook;
-                        context.WorkbookModel = model;
-
-                        Console.WriteLine($"Sheets in document ({sheets.Count}):");
-                        foreach (var sheet in sheets)
-                        {
-                            ShowSheet(sheet);
-                        }
-                        //ShowSheet(sheetsMap[TableSheets.Clients]);
-                    }
-                    else
-                        Console.WriteLine("\nFile not found\n");
+                    //var sheets = context.Workbook.Worksheets;
+                    //Console.WriteLine($"Sheets in document ({sheets.Count}):");
+                    //foreach (var sheet in sheets)
+                    //{
+                    //    ShowSheet(sheet);
+                    //}
                 }
                 else if (commandId == 1)
                 {
@@ -86,18 +106,6 @@ namespace ExcelTestTask
                     Console.WriteLine("\nWrong command\n");
                 Console.WriteLine();
             }
-        }
-
-        private static WorkbookModel CreateModel(IXLWorksheets sheets)
-        {
-            var productsSheet = sheets.Single(s => s.Name == "Товары");
-            var clientsSheet = sheets.Single(s => s.Name == "Клиенты");
-            var ordersSheet = sheets.Single(s => s.Name == "Заявки");
-            var model = new WorkbookModel(
-                new DataTable<ClientData>(clientsSheet, new ClientsConverter()),
-                new DataTable<ProductData>(productsSheet, new ProductConverter()),
-                new DataTable<OrderData>(ordersSheet, new OrderConverter()));
-            return model;
         }
 
         private static void ShowSheet(IXLWorksheet sheet)

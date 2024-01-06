@@ -4,10 +4,10 @@ namespace ExcelTestTask.Application
 {
     public class ArgumentParser
     {
-        public ICommandArgument RequestArgument(IArgumentDescription argumentDescription)
+        public ICommandArgument ParseArgument(
+            IArgumentDescription argumentDescription,
+            string input)
         {
-            Console.WriteLine($"Enter {argumentDescription.Description}:");
-            var input = Console.ReadLine();
             object value;
             switch (argumentDescription.Type)
             {

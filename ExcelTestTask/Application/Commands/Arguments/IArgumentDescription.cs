@@ -2,7 +2,7 @@
 {
     public interface IArgumentDescription
     {
-        public string Description { get; }
         public ArgumentType Type { get; }
+        public string Description { get; }
     }
 }
