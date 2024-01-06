@@ -24,12 +24,19 @@ namespace ExcelTestTask.Application
 
         public T GetValue<T>()
         {
-            if (typeof(T).IsAssignableFrom(_value.GetType()))
+            var valueType = _value.GetType();
+            var targetType = typeof(T);
+            if (targetType.IsAssignableFrom(valueType))
             {
                 return (T)_value;
             }
+            else if (targetType.IsValueType && valueType.IsValueType)
+            {
+                //TODO: fix problem with parsing generic numeric values(double to int)
+                return (T)_value;
+            }
             else
-                throw new InvalidOperationException();
+                throw new InvalidOperationException("Can't convert value to target type");
         }
     }
 }

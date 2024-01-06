@@ -33,6 +33,7 @@ namespace ExcelTestTask.Application
                 new ChooseFileCommand(),
                 new DisplayProductInfoCommand(),
                 new ChangeClientContactsCommand(),
+                new DisplayGoldenClientCommand(),
             };
         }
 
