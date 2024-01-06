@@ -1,4 +1,6 @@
 ﻿using ClosedXML.Excel;
+using DocumentFormat.OpenXml.Spreadsheet;
+using ExcelTestTask.Data;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -67,7 +69,17 @@ namespace ExcelTestTask
                 {
                     Console.WriteLine("Enter product name:");
                     var productName = Console.ReadLine();
-
+                    var sheetModel = new DataTable<ClientData>(
+                        sheetsMap[TableSheets.Clients],
+                        new ClientsConverter());
+                    sheetModel.ModifyData(
+                        d => d.Id == int.Parse(productName),
+                        d => new ClientData(d.Id, d.OrganizationName, d.Address, "Байвис"));
+                    foreach (var data in sheetModel.GetData(d => true))
+                    {
+                        Console.Write($"{data.Id}\t {data.Contacts}");
+                        Console.WriteLine();
+                    }
                     //Get product name (Товары)
                     //Get product id (Товары)
                     //Get entries with product id (Заявки)

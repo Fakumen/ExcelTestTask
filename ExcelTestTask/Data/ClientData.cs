@@ -1,6 +1,6 @@
 ﻿namespace ExcelTestTask.Data
 {
-    public struct ClientData
+    public readonly struct ClientData
     {
         public ClientData(int id, string organizationName, string address, string contacts)
         {
@@ -11,8 +11,13 @@
         }
 
         public int Id { get; }
-        public string OrganizationName { get; set; }
-        public string Address { get; set; }
-        public string Contacts { get; set; }
+        public string OrganizationName { get; }
+        public string Address { get; }
+        public string Contacts { get; }
+
+        public override int GetHashCode()
+        {
+            return Id.GetHashCode();
+        }
     }
 }
