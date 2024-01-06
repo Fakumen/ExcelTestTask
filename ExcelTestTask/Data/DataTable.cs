@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace ExcelTestTask.Data
 {
-    public class DataTable<TData>
+    public class DataTable<TData> : IDataTable<TData>
     {
         private readonly IXLWorksheet _datasheet;
         private readonly IRowDataConverter<TData> _converter;
