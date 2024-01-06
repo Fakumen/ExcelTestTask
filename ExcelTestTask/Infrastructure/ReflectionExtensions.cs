@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Reflection;
 
 namespace ExcelTestTask.Infrastructure
 {
@@ -31,7 +29,21 @@ namespace ExcelTestTask.Infrastructure
 
         public static Type[] GetAllSubTypes(Type type)
         {
-            throw new NotImplementedException();
+            return Assembly
+                .GetExecutingAssembly()
+                .GetTypes()
+                .Where(t => type.IsAssignableFrom(t))
+                .ToArray();
+        }
+
+        public static Type[] GetAllSubTypes<T>()
+        {
+            var type = typeof(T);
+            return Assembly
+                .GetExecutingAssembly()
+                .GetTypes()
+                .Where(t => type.IsAssignableFrom(t))
+                .ToArray();
         }
     }
 }
